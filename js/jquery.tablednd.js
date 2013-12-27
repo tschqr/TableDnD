@@ -152,6 +152,7 @@ window.jQuery.tableDnD = {
                 onDragClass: "tDnD_whileDrag",
                 onDrop: null,
                 onDragStart: null,
+                onDragAbort: null,
                 scrollAmount: 5,
                 /** Sensitivity setting will throttle the trigger rate for movement detection */
                 sensitivity: 10,
@@ -538,6 +539,11 @@ window.jQuery.tableDnD = {
             && this.originalOrder != this.currentOrder()
             && $(droppedRow).hide().fadeIn('fast')
             && config.onDrop(this.currentTable, droppedRow);
+
+        // Call the onDragAbort method if there is one
+        config.onDragAbort
+            && this.originalOrder == this.currentOrder()
+            && config.onDragAbort(this.currentTable, droppedRow);
 
         this.currentTable = null; // let go of the table too
     },
