@@ -81,9 +81,9 @@
 !function ($, window, document, undefined) {
 // Determine if this is a touch device
 var hasTouch   = 'ontouchstart' in document.documentElement,
-    startEvent = 'touchstart mousedown',
-    moveEvent  = 'touchmove mousemove',
-    endEvent   = 'touchend mouseup';
+    startEvent = hasTouch ? 'touchstart' : 'mousedown',
+    moveEvent  = hasTouch ? 'touchmove'  : 'mousemove',
+    endEvent   = hasTouch ? 'touchend'   : 'mouseup';
 
 // If we're on a touch device, then wire up the events
 // see http://stackoverflow.com/a/8456194/1316086
@@ -152,7 +152,6 @@ jQuery.tableDnD = {
                 onDragClass: "tDnD_whileDrag",
                 onDrop: null,
                 onDragStart: null,
-                onDragAbort: null,
                 scrollAmount: 5,
                 /** Sensitivity setting will throttle the trigger rate for movement detection */
                 sensitivity: 10,
@@ -284,10 +283,10 @@ jQuery.tableDnD = {
     },
     /** Get the mouse coordinates from the event (allowing for browser differences) */
     mouseCoords: function(e) {
-        if (e.originalEvent.changedTouches)
+        if (hasTouch)
             return {
-                x: e.originalEvent.changedTouches[0].clientX,
-                y: e.originalEvent.changedTouches[0].clientY
+                x: event.changedTouches[0].clientX,
+                y: event.changedTouches[0].clientY
             };
         
         if(e.pageX || e.pageY)
@@ -500,13 +499,13 @@ jQuery.tableDnD = {
         return null;
     },
     processMouseup: function() {
-        if (!this.currentTable || !this.dragObject)
-            return null;
-
         var config      = this.currentTable.tableDnDConfig,
             droppedRow  = this.dragObject,
             parentLevel = 0,
             myLevel     = 0;
+
+        if (!this.currentTable || !droppedRow)
+            return null;
 
         // Unbind the event handlers
         $(document)
@@ -545,11 +544,6 @@ jQuery.tableDnD = {
             && this.originalOrder != this.currentOrder()
             && $(droppedRow).hide().fadeIn('fast')
             && config.onDrop(this.currentTable, droppedRow);
-
-        // Call the onDragAbort method if there is one
-        config.onDragAbort
-            && this.originalOrder == this.currentOrder()
-            && config.onDragAbort(this.currentTable, droppedRow);
 
         this.currentTable = null; // let go of the table too
     },
